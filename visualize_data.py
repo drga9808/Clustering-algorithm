@@ -1,7 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def plot_data(X, CH=None, show_CHs=False, show_line=False, boundaries_points=None, boundaries_lines_m=None, boundaries_lines_b=None):
+def plot_data(X, CH=None, show_CHs=False, show_line=False, 
+              boundaries_points=None, boundaries_lines_m=None, boundaries_lines_b=None,
+              title = None):
     # Scatter plot for X points
     plt.scatter(X[:,0], X[:,1], color='blue', marker='o')
     
@@ -41,8 +43,10 @@ def plot_data(X, CH=None, show_CHs=False, show_line=False, boundaries_points=Non
     # Setting labels and title
     plt.xlabel('X-coordinate')
     plt.ylabel('Y-coordinate')
-    plt.title('Customizable Scatter Plot')
-    
+    if title == None:
+        plt.title('Customizable Scatter Plot')
+    else:
+        plt.title(title)        
     # Display the plot
     plt.grid(True)
     plt.show()

@@ -28,8 +28,6 @@ def normal_line_through_midpoint(P1, P2):
             m_perpendicular = float('inf')  # Infinite slope represents a vertical line
         else:
             m_perpendicular = -1 / m
-    
-    #print(f'The m_perpendicular is {m_perpendicular}')
 
     # Compute the y-intercept of the normal line
     if m_perpendicular == float('inf'):
@@ -40,14 +38,11 @@ def normal_line_through_midpoint(P1, P2):
     return M, m_perpendicular, b
 
 
-def find_boundaries(X, CH):
+def find_boundaries(X, CH, title):
     # Define the boundaries array with size cluster.size - 1  
     boundaries_points  = np.zeros(( CH.shape[0]-1, CH.shape[1]))
     boundaries_lines_m = [None] * (boundaries_points.shape[0])
     boundaries_lines_b = [None] * (boundaries_points.shape[0])
-
-    print('\n!!!!! Finding Boundaries... !!!!!')
-    #print(f'Boundaries array shape: {boundaries_points.shape}')
 
     if CH.shape[0] == 1:
         print('There are not boundaries to be found')
@@ -69,12 +64,12 @@ def find_boundaries(X, CH):
                             boundaries_points=boundaries_points, 
                             boundaries_lines_m=boundaries_lines_m, 
                             boundaries_lines_b=boundaries_lines_b, 
-                            show_line=True)
+                            show_line=True, title=title)
 
     return boundaries_points, boundaries_lines_m, boundaries_lines_b
 
 
-def compute_distance(X, CH, boundaries_lines_m, boundaries_lines_b):
+def allocate_datapoints(X, CH, boundaries_lines_m, boundaries_lines_b):
     
     # define a dictionary with each cluster with its corresponding points.
     cluster_points = {}
@@ -95,9 +90,11 @@ def compute_distance(X, CH, boundaries_lines_m, boundaries_lines_b):
                                 for point in X 
                                 if boundaries_lines_m[i-1]*point[0] + boundaries_lines_b[i-1] - point[1] <= 0
                                 and boundaries_lines_m[i]*point[0] + boundaries_lines_b[i] - point[1] > 0]
+    
+    return cluster_points
 
-    #print(cluster_points)
-
+def compute_D(CH, cluster_points):
+    
     # Distance (Square residual D)
     D = 0
 
@@ -107,10 +104,9 @@ def compute_distance(X, CH, boundaries_lines_m, boundaries_lines_b):
             distance = euclidean(point, centroid)**2
             D += distance
     
-    return np.round(D), cluster_points
+    return np.round(D)
 
-
-def compute_centroids(X, CH, cluster_points, boundaries_points, boundaries_lines_m, boundaries_lines_b):
+def compute_centroids(X, CH, cluster_points, boundaries_points, boundaries_lines_m, boundaries_lines_b, title):
 
     # Find the new cluster positions using the average of their corresponding points
     for i in cluster_points.keys():
@@ -124,7 +120,7 @@ def compute_centroids(X, CH, cluster_points, boundaries_points, boundaries_lines
                             boundaries_points=boundaries_points, 
                             boundaries_lines_m=boundaries_lines_m, 
                             boundaries_lines_b=boundaries_lines_b, 
-                            show_line=True)
+                            show_line=True, title=title)
 
     return CH
 
