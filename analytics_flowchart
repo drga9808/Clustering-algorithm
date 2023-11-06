@@ -1,0 +1,26 @@
+digraph "Algortihm for Clustering" {
+	node [style=filled]
+	fontcolor=black fontsize=30 label="Algortihm for Clustering 
+
+" labeljust=c labelloc=t
+	rankdir=TP
+	ranksep=1
+	A [label="Initial locations of 
+ cluster heads" color=black fillcolor=lightblue fontcolor=black shape=box]
+	B [label="Find boundaries 
+ beteen clusters" fillcolor=lightblue shape=box]
+	C [label="Compute square residual (D) 
+ between data points 
+ and clusters (distance)" fillcolor=lightblue shape=box]
+	D [label="Is residual (D) < E 
+ (epsilon --> tolerance)" fillcolor=lightpink shape=diamond]
+	D1 [label=Stop fillcolor=lightblue shape=box]
+	D2 [label="Set  k = k + 1 (number of iterations) 
+ and find new cluster (centroids)." fillcolor=lightcoral shape=box]
+	A -> B
+	B -> C
+	C -> D
+	D -> D1 [label=Yes]
+	D -> D2 [label=No]
+	D2 -> A [label="Start again"]
+}

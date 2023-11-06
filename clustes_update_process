@@ -1,0 +1,27 @@
+digraph "Cluster Update Process" {
+	node [color=black fillcolor=lightblue fontcolor=black shape=box style=filled]
+	fontcolor=black fontsize=30 label="Cluster Update Process 
+
+" labeljust=c labelloc=t rankdir=TP ranksep=1
+	A [label="Find the boundaries 
+ between the innitial 
+ clusters"]
+	B [label="Group clusters with their 
+ corresponding datapoints"]
+	C [label="Compute square 
+ residual (D) 
+ between data points 
+ and clusters"]
+	D [label="Compute the new cluster 
+ positions based 
+ on the  average distance 
+ of their points"]
+	E [label="Find the boundaries 
+ between the updated 
+ clusters"]
+	A -> B
+	B -> C
+	C -> D
+	D -> E [label="Start again"]
+	E -> B
+}
