@@ -1,26 +1,30 @@
-digraph "Algortihm for Clustering" {
-	node [style=filled]
-	fontcolor=black fontsize=30 label="Algortihm for Clustering 
+digraph "Initialization Stage" {
+	node [color=black fillcolor=lightblue fontcolor=black shape=box style=filled]
+	fontcolor=black fontsize=20 label="Initialization Stage 
 
 " labeljust=c labelloc=t
-	rankdir=TP
 	ranksep=1
-	A [label="Initial locations of 
- cluster heads" color=black fillcolor=lightblue fontcolor=black shape=box]
-	B [label="Find boundaries 
- beteen clusters" fillcolor=lightblue shape=box]
-	C [label="Compute square residual (D) 
- between data points 
- and clusters (distance)" fillcolor=lightblue shape=box]
-	D [label="Is residual (D) < E 
- (epsilon --> tolerance)" fillcolor=lightpink shape=diamond]
-	D1 [label=Stop fillcolor=lightblue shape=box]
-	D2 [label="Set  k = k + 1 (number of iterations) 
- and find new cluster (centroids)." fillcolor=lightcoral shape=box]
+	A [label="Initialization of the 
+ first 2 clusters"]
+	B [label="Find boundaries between 
+ the initital clusters."]
+	C [label="Allocate data points 
+ to their 
+ corresponding clusters."]
+	D [label="Recalculate 
+ cluster positionns 
+ based on the 
+ average."]
+	E [label="Find the new boundaries 
+ between these 
+ recalculated clusters."]
+	F [label="Assign data points 
+ to their 
+ corresponding 
+ recalculated clusters."]
 	A -> B
 	B -> C
 	C -> D
-	D -> D1 [label=Yes]
-	D -> D2 [label=No]
-	D2 -> A [label="Start again"]
+	D -> E
+	E -> F
 }

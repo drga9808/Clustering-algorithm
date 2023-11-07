@@ -1,27 +1,39 @@
-digraph "Cluster Update Process" {
+digraph "Cluster Addition Process" {
 	node [color=black fillcolor=lightblue fontcolor=black shape=box style=filled]
-	fontcolor=black fontsize=30 label="Cluster Update Process 
+	fontcolor=black fontsize=20 label="Cluster Update Process 
 
-" labeljust=c labelloc=t rankdir=TP ranksep=1
-	A [label="Find the boundaries 
- between the innitial 
- clusters"]
-	B [label="Group clusters with their 
- corresponding datapoints"]
-	C [label="Compute square 
- residual (D) 
- between data points 
- and clusters"]
-	D [label="Compute the new cluster 
- positions based 
- on the  average distance 
- of their points"]
-	E [label="Find the boundaries 
- between the updated 
- clusters"]
+" labeljust=c labelloc=t rankdir=TP ranksep=0.3
+	A [label="Initial Stage"]
+	B [label="Evaluate if the actual 
+ square residual is 
+ too much greater than 
+ the previous one." fillcolor=lightpink shape=diamond]
+	B1 [label=Stop]
+	B2 [label="Find the farest 
+ euclidean distance 
+ from a node to its 
+ corresponding cluster."]
+	B3 [label="Evaluate the criterium 
+ for adding a new cluster."]
+	B4 [label="Find the new boundaries 
+ with the new added cluster."]
+	B5 [label="Assign data points 
+ to their 
+ corresponding clusters 
+ with the new clusters."]
+	B6 [label="Recalculate cluster 
+ positionns based on 
+ the average."]
+	B7 [label="Compute the squared 
+ residual between 
+ measurements and clusters."]
 	A -> B
-	B -> C
-	C -> D
-	D -> E [label="Start again"]
-	E -> B
+	B -> B1 [label=No]
+	B -> B2 [label=Yes]
+	B2 -> B3
+	B3 -> B4
+	B4 -> B5
+	B5 -> B6
+	B6 -> B7
+	B7 -> B [label="Evaluate again"]
 }

@@ -2,6 +2,12 @@ import visualize_data
 from scipy.spatial.distance import euclidean
 import numpy as np
 
+# Function to generate a random set of n points with shape (n, 2) within a specified range
+def generate_random_points(n, lower_bound, upper_bound):
+    # Generate random points in the specified range [lower_bound, upper_bound)
+    points = np.random.randint(low=lower_bound, high=upper_bound, size=(n, 2))
+    return points
+
 def custom_round(x):
     # np.where is used to apply a condition element-wise
     # For positive numbers halfway between two integers, round up
@@ -71,26 +77,50 @@ def find_boundaries(X, CH, title):
 
 def allocate_datapoints(X, CH, boundaries_lines_m, boundaries_lines_b):
     
+    # !!!!!!!!!! Modificate the criterium of the points that lie on the bloundary line !!!!!!!!
+
     # define a dictionary with each cluster with its corresponding points.
     cluster_points = {}
 
     # Assign the points to their corresponding clusters evaluating the boundary
     # !!! I will take the values that lay on the edge for the upper cluster !!!
-    for i in range(CH.shape[0]):
-        if i == 0:
-            cluster_points[i] = [point 
-                                for point in X 
-                                if boundaries_lines_m[i]*point[0] + boundaries_lines_b[i] - point[1] > 0]
-        elif i == CH.shape[0]-1:
-            cluster_points[i] = [point 
-                                for point in X 
-                                if boundaries_lines_m[i-1]*point[0] + boundaries_lines_b[i-1] - point[1] <= 0]
-        else:
-            cluster_points[i] = [point 
-                                for point in X 
-                                if boundaries_lines_m[i-1]*point[0] + boundaries_lines_b[i-1] - point[1] <= 0
-                                and boundaries_lines_m[i]*point[0] + boundaries_lines_b[i] - point[1] > 0]
+    random_number = np.random.randint(2) # this is used for points that lie on the decision boundary, depend on the 
+                                         # random number (0 or 1) in each iteration point will be in the (upper --> 1)
+                                         # or (bottom --> 0) cluster.
+    if random_number == 0: # (Bottom cluster)
+        for i in range(CH.shape[0]):
+            if i == 0: # Points in the first cluster (this cluster doesn't have bottom boundary)
+                cluster_points[i] = [point 
+                                    for point in X 
+                                    if boundaries_lines_m[i]*point[0] + boundaries_lines_b[i] - point[1] > 0]
+            elif i == CH.shape[0]-1: # Point in the last cluster (this cluster doesn't have top boundary)
+                cluster_points[i] = [point 
+                                    for point in X 
+                                    if boundaries_lines_m[i-1]*point[0] + boundaries_lines_b[i-1] - point[1] <= 0]
+            else:        
+                    cluster_points[i] = [point # Points in the middle 
+                                        for point in X 
+                                        if boundaries_lines_m[i-1]*point[0] + boundaries_lines_b[i-1] - point[1] < 0
+                                        and boundaries_lines_m[i]*point[0] + boundaries_lines_b[i] - point[1] >= 0]
+                                        # Assing points that lie on the boundary line to the bottom cluster
     
+    if random_number == 1: # (Upper cluster)
+        for i in range(CH.shape[0]):
+            if i == 0: # Points in the first cluster (this cluster doesn't have bottom boundary)
+                cluster_points[i] = [point 
+                                    for point in X 
+                                    if boundaries_lines_m[i]*point[0] + boundaries_lines_b[i] - point[1] > 0]
+            elif i == CH.shape[0]-1: # Point in the last cluster (this cluster doesn't have top boundary)
+                cluster_points[i] = [point 
+                                    for point in X 
+                                    if boundaries_lines_m[i-1]*point[0] + boundaries_lines_b[i-1] - point[1] <= 0]
+            else:        
+                    cluster_points[i] = [point # Points in the middle 
+                                        for point in X 
+                                        if boundaries_lines_m[i-1]*point[0] + boundaries_lines_b[i-1] - point[1] <= 0
+                                        and boundaries_lines_m[i]*point[0] + boundaries_lines_b[i] - point[1] > 0]
+                                        # # Assing points that lie on the boundary line to the Upper cluster
+
     return cluster_points
 
 def compute_D(CH, cluster_points):
@@ -151,16 +181,116 @@ def find_farest_node(CH, cluster_points):
     return dist_max_cluster, dist_max_point, dist_max, avg_dist
         
 
-def add_centroid(dist_max_cluster, dist_max_point, dist_max):
+def add_centroid(dist_max_cluster, dist_max_point, dist_max, lower_bound, upper_bound):
+    # Initialize new_CH as a zero array with the same shape as dist_max_cluster
+    new_CH = np.zeros_like(dist_max_cluster)
 
-    # Find the direction where the new cluster has to be located following the direction of this farest node
-    if (dist_max_cluster[0] - dist_max_point[0] > 0) and (dist_max_cluster[1] - dist_max_point[1] > 0) :    
-        # move to the left
-        new_CH = np.round(dist_max_cluster - ( (dist_max) / 2))
-    else:
-        # move to the right
-        new_CH = np.round(dist_max_cluster + ( (dist_max) / 2))
-    
+    # Right
+    if (dist_max_cluster[0] - dist_max_point[0] < 0) and (dist_max_cluster[1] - dist_max_point[1] == 0):
+        new_CH[0] = np.round(dist_max_cluster[0] + (dist_max / 2))
+        new_CH[1] = dist_max_cluster[1]
+
+    # Left
+    elif (dist_max_cluster[0] - dist_max_point[0] > 0) and (dist_max_cluster[1] - dist_max_point[1] == 0):
+        new_CH[0] = np.round(dist_max_cluster[0] - (dist_max / 2))
+        new_CH[1] = dist_max_cluster[1]
+
+    # Top
+    elif (dist_max_cluster[1] - dist_max_point[1] < 0) and (dist_max_cluster[0] - dist_max_point[0] == 0):
+        new_CH[0] = dist_max_cluster[0]
+        new_CH[1] = np.round(dist_max_cluster[1] + (dist_max / 2))
+
+    # Bottom
+    elif (dist_max_cluster[1] - dist_max_point[1] > 0) and (dist_max_cluster[0] - dist_max_point[0] == 0):
+        new_CH[0] = dist_max_cluster[0]
+        new_CH[1] = np.round(dist_max_cluster[1] - (dist_max / 2))
+
+    # Top Right
+    elif (dist_max_cluster[0] - dist_max_point[0] < 0) and (dist_max_cluster[1] - dist_max_point[1] < 0):
+        new_CH[0] = np.round(dist_max_cluster[0] + (dist_max / 2))
+        new_CH[1] = np.round(dist_max_cluster[1] + (dist_max / 2))
+
+    # Top Left
+    elif (dist_max_cluster[0] - dist_max_point[0] > 0) and (dist_max_cluster[1] - dist_max_point[1] < 0):
+        new_CH[0] = np.round(dist_max_cluster[0] - (dist_max / 2))
+        new_CH[1] = np.round(dist_max_cluster[1] + (dist_max / 2))
+
+    # Bottom Right
+    elif (dist_max_cluster[0] - dist_max_point[0] < 0) and (dist_max_cluster[1] - dist_max_point[1] > 0):
+        new_CH[0] = np.round(dist_max_cluster[0] + (dist_max / 2))
+        new_CH[1] = np.round(dist_max_cluster[1] - (dist_max / 2))
+
+    # Bottom Left
+    elif (dist_max_cluster[0] - dist_max_point[0] > 0) and (dist_max_cluster[1] - dist_max_point[1] > 0):
+        new_CH[0] = np.round(dist_max_cluster[0] - (dist_max / 2))
+        new_CH[1] = np.round(dist_max_cluster[1] - (dist_max / 2))
+
+    # After calculating new_CH, ensure it is within the allowed boundaries
+    # Check for upper boundary
+    if new_CH[0] > upper_bound:
+        new_CH[0] = upper_bound
+    if new_CH[1] > upper_bound:
+        new_CH[1] = upper_bound
+
+    # Check for lower boundary
+    if new_CH[0] < lower_bound:
+        new_CH[0] = lower_bound
+    if new_CH[1] < lower_bound:
+        new_CH[1] = lower_bound
+
     print(f'newCH = {new_CH}, last_CH = {dist_max_cluster}')
 
     return new_CH
+
+
+# Calculate the euclidean distance between 2 points
+def calculate_euclidean_distance(point1, point2):
+    return np.linalg.norm(point1 - point2)
+
+# Calculate the distance from the cluster to the the boundary line (perpendicular distance)
+# def calculate_distance_to_line(centroid, m, b):
+#     # Distance from point to line (Ax + By + C = 0) is |Ax + By + C| / sqrt(A^2 + B^2)
+#     # For y = mx + b, A = -m, B = 1, and C = -b
+#     return abs(-m * centroid[0] + centroid[1] + b) / np.sqrt(m**2 + 1)
+
+def check_distance_clusters(CH, cluster_points, boundaries_points):
+    # Step 1: Calculate farthest intra-cluster distances
+    farthest_distances = {}
+    for cluster_id, points in cluster_points.items():
+        centroid = CH[cluster_id]
+        distances = [calculate_euclidean_distance(centroid, point) for point in points]
+        farthest_distance = max(distances)
+        farthest_distances[cluster_id] = farthest_distance
+
+
+     # Step 2: Calculate distances between adjacent cluster centroids
+    centroid_distances = {}
+    for cluster_id in range(len(CH)):
+        if cluster_id == 0:
+            # For the first cluster, only calculate distance to the next centroid
+            next_centroid = CH[cluster_id + 1]
+            centroid_distances[cluster_id] = calculate_euclidean_distance(CH[cluster_id], next_centroid)
+        elif cluster_id == len(CH) - 1:
+            # For the last cluster, only calculate distance to the previous centroid
+            prev_centroid = CH[cluster_id - 1]
+            centroid_distances[cluster_id] = calculate_euclidean_distance(CH[cluster_id], prev_centroid)
+        else:
+            # For other clusters, calculate distance to both the previous and next centroids and take the minimum
+            prev_centroid = CH[cluster_id - 1]
+            next_centroid = CH[cluster_id + 1]
+            distance_to_prev = calculate_euclidean_distance(CH[cluster_id], prev_centroid)
+            distance_to_next = calculate_euclidean_distance(CH[cluster_id], next_centroid)
+            centroid_distances[cluster_id] = min(distance_to_prev, distance_to_next)
+
+
+    # Step 3: Compare the farthest intra-cluster distances to the centroid-to-adjacent-centroid distances
+    for cluster_id in farthest_distances:
+        print(f'farest point distance from cluster {cluster_id}: {farthest_distances[cluster_id]}')
+        print(f'mimimum distance between clusters for cluster {cluster_id}: {centroid_distances[cluster_id]}')
+        # If the farthest intra-cluster distance is greater than the distance to the closest adjacent centroid
+        if farthest_distances[cluster_id] > (0.7 * centroid_distances[cluster_id]):
+            return True  # Return True if any farthest distance is greater than the closest adjacent centroid distance
+
+    return False  # Return False if no farthest distances are greater than the closest adjacent centroid distances
+
+ 

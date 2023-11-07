@@ -1,15 +1,16 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def plot_data(X, CH=None, show_CHs=False, show_line=False, 
+def plot_data(X, CH=None, Show_Point_labels=False, show_CHs=False, show_line=False, 
               boundaries_points=None, boundaries_lines_m=None, boundaries_lines_b=None,
               title = None):
     # Scatter plot for X points
     plt.scatter(X[:,0], X[:,1], color='blue', marker='o')
     
     # Annotate each point in X with its coordinates if requested
-    for x, y in X:
-        plt.annotate(f'({x}, {y})', (x, y), textcoords="offset points", xytext=(0,5), ha='center')
+    if Show_Point_labels:
+        for x, y in X:
+            plt.annotate(f'({x}, {y})', (x, y), textcoords="offset points", xytext=(0,5), ha='center')
             
     # Scatter plot for CH points if provided
     if CH is not None and show_CHs:
